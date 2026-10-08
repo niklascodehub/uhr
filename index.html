@@ -30,6 +30,9 @@ body{height:100dvh;padding:env(safe-area-inset-top) env(safe-area-inset-right) e
 .bar{position:fixed;left:0;right:0;display:flex;justify-content:space-between;align-items:center;
   gap:12px;padding:12px 16px;z-index:10;
   padding-left:calc(16px + env(safe-area-inset-left));padding-right:calc(16px + env(safe-area-inset-right))}
+.bar{transition:opacity .5s ease}
+.idle .bar{opacity:0;pointer-events:none}
+.idle{cursor:none}
 .bar.top{top:env(safe-area-inset-top)}
 .bar.bottom{bottom:env(safe-area-inset-bottom)}
 .group{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
@@ -277,11 +280,29 @@ dialog::backdrop{background:rgba(0,0,0,.55)}
     } } catch {}
   }
   document.addEventListener('visibilitychange', () => { if (!document.hidden) keepAwake(); });
-  addEventListener('pointerdown', keepAwake, { once: true });
+  addEventListener('pointerdown', keepAwake);
+  addEventListener('load', keepAwake);
+  keepAwake();
+
+  /* ---------- Bedienelemente nach Inaktivität ausblenden ---------- */
+  const IDLE_MS = 10000;
+  let idleTimer = null;
+  function wake(){
+    document.body.classList.remove('idle');
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(() => {
+      if (!document.getElementById('dlg').open) document.body.classList.add('idle');
+      else wake();
+    }, IDLE_MS);
+  }
+  ['pointerdown', 'pointermove', 'touchstart', 'keydown'].forEach(ev =>
+    addEventListener(ev, wake, { passive: true }));
+  wake();
 
   /* ---------- UI ---------- */
   function refreshButtons(){
-    document.body.className = style + (document.body.classList.contains('done') ? ' done' : '');
+    document.body.classList.toggle('flip', style === 'flip');
+    document.body.classList.toggle('plain', style === 'plain');
     document.documentElement.dataset.theme = theme;
     document.querySelector('meta[name=theme-color]').content = theme === 'dark' ? '#000000' : '#ffffff';
     document.querySelectorAll('#styleSeg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.style === style));
