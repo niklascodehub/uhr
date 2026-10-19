@@ -1,5 +1,5 @@
 // Bei jeder Aenderung an der App die Versionsnummer erhoehen (v2 -> v3 ...)
-const CACHE = 'uhr-v3';
+const CACHE = 'uhr-v4';
 const FILES = ['./', 'index.html', 'manifest.json', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png'];
 
 self.addEventListener('install', e => {

@@ -17,14 +17,18 @@
 :root{
   --bg:#000; --fg:#f2f2f2; --card:#171717; --ui:#8a8a8a; --ui-on:#f2f2f2; --ui-bg:#1f1f1f;
 }
+:root{color-scheme:dark}
 :root[data-theme="light"]{
   --bg:#fff; --fg:#111; --card:#ececec; --ui:#777; --ui-on:#111; --ui-bg:#eee;
+  color-scheme:light;
 }
+html{scrollbar-width:none}
+::-webkit-scrollbar{display:none;width:0;height:0}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);overflow:hidden;
+html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);overflow:hidden;overscroll-behavior:none;
   font-family:"Manrope","Helvetica Neue",Helvetica,Arial,system-ui,sans-serif;
   -webkit-user-select:none;user-select:none;touch-action:manipulation}
-body{height:100dvh;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+body{position:fixed;inset:0;height:auto;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
 
 /* Bedienelemente */
 .bar{position:fixed;left:0;right:0;display:flex;justify-content:space-between;align-items:center;
@@ -43,6 +47,27 @@ button[aria-pressed="true"]{background:var(--bg);color:var(--ui-on)}
 button:focus-visible{outline:2px solid var(--ui-on);outline-offset:2px}
 .btn{background:var(--ui-bg);color:var(--ui-on)}
 .btn[hidden]{display:none}
+
+.ico{width:22px;height:22px;display:block;fill:none;stroke:currentColor;stroke-width:2;
+  stroke-linecap:round;stroke-linejoin:round}
+.ico .f{fill:currentColor;stroke:none}
+button.i{display:inline-flex;align-items:center;justify-content:center;min-width:44px;padding:0 11px}
+.seg button.i{min-width:48px}
+
+/* Einstellungen */
+.row{display:flex;align-items:center;justify-content:space-between;gap:28px;font-size:16px;margin:0 0 6px}
+.switch{position:relative;width:48px;height:28px;flex:none}
+.switch input{position:absolute;inset:0;width:100%;height:100%;opacity:0;margin:0;cursor:pointer}
+.switch span{position:absolute;inset:0;border-radius:14px;background:var(--bg);border:1px solid var(--ui);transition:background .2s}
+.switch span::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;
+  background:var(--ui);transition:transform .2s,background .2s}
+.switch input:checked + span{background:var(--fg);border-color:var(--fg)}
+.switch input:checked + span::after{transform:translateX(20px);background:var(--bg)}
+.switch input:disabled{cursor:not-allowed}
+.switch input:disabled + span{opacity:.45}
+.switch input:focus-visible + span{outline:2px solid var(--ui-on);outline-offset:2px}
+.hint{font-size:13px;color:var(--ui);margin:6px 0 18px;max-width:280px}
+.hint[hidden]{display:none}
 
 /* Anzeige */
 #display{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
@@ -81,6 +106,9 @@ button:focus-visible{outline:2px solid var(--ui-on);outline-offset:2px}
 @keyframes ft{to{transform:rotateX(-90deg)}}
 @keyframes fb{to{transform:rotateX(0)}}
 
+/* Doppelpunkte aus (nur Flip-Stil) */
+.flip.nocolons .sep{display:none}
+
 /* Timer fertig */
 .done #display{animation:blink 1s steps(2,start) infinite}
 @keyframes blink{50%{opacity:.25}}
@@ -102,7 +130,7 @@ dialog::backdrop{background:rgba(0,0,0,.55)}
 .fields label{display:flex;flex-direction:column;gap:6px;font-size:14px;color:var(--ui)}
 .fields input{width:84px;font:inherit;font-size:28px;text-align:center;padding:8px;border-radius:12px;
   border:1px solid var(--ui);background:var(--bg);color:var(--fg)}
-.actions{display:flex;justify-content:flex-end;gap:8px}
+.actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
 </style>
 </head>
 <body class="flip">
@@ -110,28 +138,29 @@ dialog::backdrop{background:rgba(0,0,0,.55)}
 <div class="bar top">
   <div class="group">
     <div class="seg" id="styleSeg" role="group" aria-label="Darstellung">
-      <button data-style="flip">Flip</button>
-      <button data-style="plain">Minimal</button>
+      <button class="i" data-style="flip" aria-label="Flip-Stil" title="Flip-Stil"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="3"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="2" y1="9" x2="2" y2="15"/><line x1="22" y1="9" x2="22" y2="15"/></svg></button>
+      <button class="i" data-style="plain" aria-label="Minimal-Stil" title="Minimal-Stil"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><line x1="7" y1="6" x2="7" y2="18"/><rect x="12" y="6" width="6" height="12" rx="3"/></svg></button>
     </div>
     <div class="seg" id="themeSeg" role="group" aria-label="Farbschema">
       <button data-theme="light">Hell</button>
       <button data-theme="dark">Dunkel</button>
     </div>
   </div>
+  <button class="btn i" id="cfgBtn" aria-label="Einstellungen" title="Einstellungen"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
 </div>
 
 <main id="display" aria-live="off"></main>
 
 <div class="bar bottom">
   <div class="seg" id="modeSeg" role="group" aria-label="Funktion">
-    <button data-mode="clock">Uhr</button>
-    <button data-mode="timer">Timer</button>
-    <button data-mode="stopwatch">Stoppuhr</button>
+    <button class="i" data-mode="clock" aria-label="Uhr" title="Uhr"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><polyline points="12 6.5 12 12 15.5 14"/></svg></button>
+    <button class="i" data-mode="timer" aria-label="Timer" title="Timer"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h12M6 22h12M7 2v4a5 5 0 0 0 2 4l3 2-3 2a5 5 0 0 0-2 4v4M17 2v4a5 5 0 0 1-2 4l-3 2 3 2a5 5 0 0 1 2 4v4"/></svg></button>
+    <button class="i" data-mode="stopwatch" aria-label="Stoppuhr" title="Stoppuhr"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="14" r="8"/><path d="M12 14l3-3M10 2h4M12 2v4"/></svg></button>
   </div>
   <div class="group">
-    <button class="btn" id="startBtn" hidden>Start</button>
-    <button class="btn" id="resetBtn" hidden>Zurücksetzen</button>
-    <button class="btn" id="setBtn">Timer einstellen</button>
+    <button class="btn i" id="startBtn" aria-label="Start" title="Start" hidden><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><polygon class="f" points="7 4 20 12 7 20 7 4"/></svg></button>
+    <button class="btn i" id="resetBtn" aria-label="Zurücksetzen" title="Zurücksetzen" hidden><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></button>
+    <button class="btn i" id="setBtn" aria-label="Timer einstellen" title="Timer einstellen"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></button>
   </div>
 </div>
 
@@ -149,6 +178,16 @@ dialog::backdrop{background:rgba(0,0,0,.55)}
   </form>
 </dialog>
 
+<dialog id="cfgDlg">
+  <form method="dialog">
+    <label class="row">Doppelpunkte anzeigen
+      <span class="switch"><input type="checkbox" id="colonsChk"><span></span></span>
+    </label>
+    <p class="hint" id="colonsHint" hidden>Im Minimal-Stil sind die Doppelpunkte immer sichtbar.</p>
+    <div class="actions"><button type="submit" class="btn">Fertig</button></div>
+  </form>
+</dialog>
+
 <script>
 (() => {
   const $ = s => document.querySelector(s);
@@ -162,6 +201,9 @@ dialog::backdrop{background:rgba(0,0,0,.55)}
   let style = store.get('style', 'flip');
   let theme = store.get('theme', 'dark');
   let mode  = store.get('mode', 'clock');
+  let colons = store.get('colons', '1') !== '0';
+  const ICON_PLAY = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><polygon class="f" points="7 4 20 12 7 20 7 4"/></svg>';
+  const ICON_PAUSE = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect class="f" x="6" y="4" width="4" height="16" rx="1"/><rect class="f" x="14" y="4" width="4" height="16" rx="1"/></svg>';
   const timer = { dur: Number(store.get('timerDur', 300000)), left: 0, running: false, end: 0 };
   timer.left = timer.dur;
   const sw = { elapsed: 0, running: false, start: 0 };
@@ -291,7 +333,7 @@ dialog::backdrop{background:rgba(0,0,0,.55)}
     document.body.classList.remove('idle');
     clearTimeout(idleTimer);
     idleTimer = setTimeout(() => {
-      if (!document.getElementById('dlg').open) document.body.classList.add('idle');
+      if (!document.querySelector('dialog[open]')) document.body.classList.add('idle');
       else wake();
     }, IDLE_MS);
   }
@@ -303,6 +345,7 @@ dialog::backdrop{background:rgba(0,0,0,.55)}
   function refreshButtons(){
     document.body.classList.toggle('flip', style === 'flip');
     document.body.classList.toggle('plain', style === 'plain');
+    document.body.classList.toggle('nocolons', !colons);
     document.documentElement.dataset.theme = theme;
     document.querySelector('meta[name=theme-color]').content = theme === 'dark' ? '#000000' : '#ffffff';
     document.querySelectorAll('#styleSeg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.style === style));
@@ -311,7 +354,13 @@ dialog::backdrop{background:rgba(0,0,0,.55)}
     const running = mode === 'timer' ? timer.running : sw.running;
     $('#startBtn').hidden = mode === 'clock';
     $('#resetBtn').hidden = mode === 'clock';
-    $('#startBtn').textContent = running ? 'Pause' : 'Start';
+    const sb = $('#startBtn');
+    sb.innerHTML = running ? ICON_PAUSE : ICON_PLAY;
+    sb.setAttribute('aria-label', running ? 'Pause' : 'Start');
+    sb.title = running ? 'Pause' : 'Start';
+    $('#colonsChk').checked = colons || style === 'plain';
+    $('#colonsChk').disabled = style === 'plain';
+    $('#colonsHint').hidden = style !== 'plain';
   }
 
   $('#styleSeg').addEventListener('click', e => {
@@ -354,6 +403,12 @@ dialog::backdrop{background:rgba(0,0,0,.55)}
     if (mode === 'timer'){ timer.running = false; timer.left = timer.dur; }
     else { sw.running = false; sw.elapsed = 0; }
     refreshButtons(); update();
+  });
+
+  /* ---------- Einstellungen ---------- */
+  $('#cfgBtn').addEventListener('click', () => { refreshButtons(); $('#cfgDlg').showModal(); });
+  $('#colonsChk').addEventListener('change', e => {
+    colons = e.target.checked; store.set('colons', colons ? '1' : '0'); refreshButtons();
   });
 
   /* ---------- Timer einstellen ---------- */
