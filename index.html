@@ -354,6 +354,7 @@ dialog::backdrop{background:rgba(0,0,0,.55)}
     const running = mode === 'timer' ? timer.running : sw.running;
     $('#startBtn').hidden = mode === 'clock';
     $('#resetBtn').hidden = mode === 'clock';
+    $('#setBtn').hidden = mode !== 'timer';
     const sb = $('#startBtn');
     sb.innerHTML = running ? ICON_PAUSE : ICON_PLAY;
     sb.setAttribute('aria-label', running ? 'Pause' : 'Start');
