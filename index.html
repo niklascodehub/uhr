@@ -55,7 +55,7 @@ button.i{display:inline-flex;align-items:center;justify-content:center;min-width
 .seg button.i{min-width:48px}
 
 /* Einstellungen */
-.row{display:flex;align-items:center;justify-content:space-between;gap:28px;font-size:16px;margin:0 0 6px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:28px;font-size:16px;padding:7px 0}
 .switch{position:relative;width:48px;height:28px;flex:none}
 .switch input{position:absolute;inset:0;width:100%;height:100%;opacity:0;margin:0;cursor:pointer}
 .switch span{position:absolute;inset:0;border-radius:14px;background:var(--bg);border:1px solid var(--ui);transition:background .2s}
@@ -68,12 +68,29 @@ button.i{display:inline-flex;align-items:center;justify-content:center;min-width
 .switch input:focus-visible + span{outline:2px solid var(--ui-on);outline-offset:2px}
 .hint{font-size:13px;color:var(--ui);margin:6px 0 18px;max-width:280px}
 .hint[hidden]{display:none}
+.sub{font-size:14px;color:var(--ui);margin:14px 0 8px;padding-top:14px;border-top:1px solid var(--bg)}
+.plist{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+.plist .hint{margin:0 0 4px}
+.preset{display:flex;gap:6px}
+.preset .btn,.save .btn{background:var(--bg)}
+.pbtn{flex:1;display:flex;justify-content:space-between;align-items:center;gap:18px;text-align:left;
+  background:var(--bg);color:var(--ui-on);border-radius:12px;min-height:44px;padding:0 14px}
+.pbtn small{color:var(--ui);font-size:13px}
+.pbtn[aria-pressed="true"]{outline:2px solid var(--ui-on);outline-offset:-2px}
+.save{display:flex;gap:6px}
+.save input{flex:1;min-width:0;font:inherit;font-size:16px;min-height:44px;padding:0 12px;border-radius:12px;
+  border:1px solid var(--ui);background:var(--bg);color:var(--fg);-webkit-user-select:text;user-select:text}
 
 /* Anzeige */
 #display{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
   gap:calc(var(--h) * .12);
-  --h:min(19vw, calc(100dvh - 150px));
-  --f:min(20vw, calc(100dvh - 150px))}
+  --h:min(var(--hv), calc(100dvh - 150px));
+  --f:min(var(--fv), calc(100dvh - 150px))}
+/* Groesse je nach Anzahl sichtbarer Einheiten */
+body{--hv:19vw;--fv:20vw;--rows:3.3}
+body.u2{--hv:28vw;--fv:31vw;--rows:2.2}
+body.u1{--hv:55vw;--fv:55vw;--rows:1.1}
+.grp.off,.sep.off{display:none}
 .grp{display:flex;gap:calc(var(--h) * .06)}
 .sep{width:calc(var(--h) * .1);display:flex;flex-direction:column;justify-content:center;gap:calc(var(--h) * .22);align-items:center}
 .sep i{display:block;width:calc(var(--h) * .07);height:calc(var(--h) * .07);border-radius:50%;background:var(--fg);opacity:.85}
@@ -116,15 +133,15 @@ button.i{display:inline-flex;align-items:center;justify-content:center;min-width
 /* Hochkant: drei Zeilen */
 @media (orientation:portrait){
   #display{flex-direction:column;
-    --h:min(calc((100dvh - 170px) / 3.3), 58vw);
-    --f:min(calc((100dvh - 170px) / 3.3), 60vw)}
+    --h:min(calc((100dvh - 170px) / var(--rows)), 58vw);
+    --f:min(calc((100dvh - 170px) / var(--rows)), 60vw)}
   .sep{display:none}
   .plain #display{gap:0}
 }
 @media (prefers-reduced-motion:reduce){.ftop,.fbot{animation:none}}
 
 /* Dialog */
-dialog{border:0;border-radius:18px;padding:22px;background:var(--ui-bg);color:var(--ui-on);max-width:92vw}
+dialog{border:0;border-radius:18px;padding:22px;background:var(--ui-bg);color:var(--ui-on);max-width:92vw;max-height:90dvh;overflow:auto}
 dialog::backdrop{background:rgba(0,0,0,.55)}
 .fields{display:flex;gap:12px;margin:0 0 18px}
 .fields label{display:flex;flex-direction:column;gap:6px;font-size:14px;color:var(--ui)}
@@ -184,6 +201,21 @@ dialog::backdrop{background:rgba(0,0,0,.55)}
       <span class="switch"><input type="checkbox" id="colonsChk"><span></span></span>
     </label>
     <p class="hint" id="colonsHint" hidden>Im Minimal-Stil sind die Doppelpunkte immer sichtbar.</p>
+    <label class="row">Stunden anzeigen
+      <span class="switch"><input type="checkbox" id="unitH"><span></span></span>
+    </label>
+    <label class="row">Minuten anzeigen
+      <span class="switch"><input type="checkbox" id="unitM"><span></span></span>
+    </label>
+    <label class="row">Sekunden anzeigen
+      <span class="switch"><input type="checkbox" id="unitS"><span></span></span>
+    </label>
+    <div class="sub">Voreinstellungen</div>
+    <div class="plist" id="presetList"></div>
+    <div class="save">
+      <input id="presetName" type="text" maxlength="20" placeholder="Name" aria-label="Name der Voreinstellung" autocomplete="off">
+      <button type="button" class="btn i" id="presetSave" aria-label="Aktuelle Anzeige speichern" title="Aktuelle Anzeige speichern"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+    </div>
     <div class="actions"><button type="submit" class="btn">Fertig</button></div>
   </form>
 </dialog>
@@ -202,6 +234,16 @@ dialog::backdrop{background:rgba(0,0,0,.55)}
   let theme = store.get('theme', 'dark');
   let mode  = store.get('mode', 'clock');
   let colons = store.get('colons', '1') !== '0';
+  const loadJSON = k => { try { return JSON.parse(store.get(k, 'null')); } catch { return null; } };
+  let units = loadJSON('units');
+  units = units && typeof units === 'object'
+    ? { h: units.h !== false, m: units.m !== false, s: units.s !== false }
+    : { h: true, m: true, s: true };
+  if (!units.h && !units.m && !units.s) units.s = true;
+  let presets = loadJSON('presets');
+  presets = (Array.isArray(presets) ? presets : [])
+    .filter(p => p && typeof p.name === 'string' && p.units)
+    .map(p => ({ name: p.name.slice(0, 20), units: { h: !!p.units.h, m: !!p.units.m, s: !!p.units.s }, colons: p.colons !== false }));
   const ICON_PLAY = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><polygon class="f" points="7 4 20 12 7 20 7 4"/></svg>';
   const ICON_PAUSE = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect class="f" x="6" y="4" width="4" height="16" rx="1"/><rect class="f" x="14" y="4" width="4" height="16" rx="1"/></svg>';
   const timer = { dur: Number(store.get('timerDur', 300000)), left: 0, running: false, end: 0 };
@@ -248,17 +290,17 @@ dialog::backdrop{background:rgba(0,0,0,.55)}
   }
 
   const display = $('#display');
-  const digits = [];
+  const digits = [], groups = [], seps = [];
   for (let g = 0; g < 3; g++){
     if (g > 0){
       const sep = document.createElement('div');
       sep.className = 'sep'; sep.innerHTML = '<i></i><i></i>';
-      display.append(sep);
+      display.append(sep); seps[g] = sep;
     }
     const grp = document.createElement('div');
     grp.className = 'grp';
     for (let d = 0; d < 2; d++){ const el = makeDigit(); digits.push(el); grp.append(el); }
-    display.append(grp);
+    display.append(grp); groups[g] = grp;
   }
 
   function show(h, m, s){
@@ -267,8 +309,23 @@ dialog::backdrop{background:rgba(0,0,0,.55)}
   }
   function showSeconds(total){
     total = Math.max(0, Math.floor(total));
-    const h = Math.min(99, Math.floor(total / 3600));
-    show(h, Math.floor(total % 3600 / 60), total % 60);
+    let h = Math.floor(total / 3600), m = Math.floor(total % 3600 / 60), s = total % 60;
+    // Ausgeblendete Einheiten werden in die naechstkleinere eingerechnet
+    if (!units.h){ m += h * 60; h = 0; }
+    if (!units.m){ s += m * 60; m = 0; }
+    show(Math.min(99, h), Math.min(99, m), Math.min(99, s));
+  }
+  function layout(){
+    const vis = [units.h, units.m, units.s];
+    let any = false;
+    vis.forEach((v, g) => {
+      groups[g].classList.toggle('off', !v);
+      if (seps[g]) seps[g].classList.toggle('off', !(v && any));
+      if (v) any = true;
+    });
+    const n = vis.filter(Boolean).length;
+    document.body.classList.toggle('u1', n === 1);
+    document.body.classList.toggle('u2', n === 2);
   }
 
   /* ---------- Hauptschleife ---------- */
@@ -359,9 +416,7 @@ dialog::backdrop{background:rgba(0,0,0,.55)}
     sb.innerHTML = running ? ICON_PAUSE : ICON_PLAY;
     sb.setAttribute('aria-label', running ? 'Pause' : 'Start');
     sb.title = running ? 'Pause' : 'Start';
-    $('#colonsChk').checked = colons || style === 'plain';
-    $('#colonsChk').disabled = style === 'plain';
-    $('#colonsHint').hidden = style !== 'plain';
+    refreshSettings();
   }
 
   $('#styleSeg').addEventListener('click', e => {
@@ -407,9 +462,77 @@ dialog::backdrop{background:rgba(0,0,0,.55)}
   });
 
   /* ---------- Einstellungen ---------- */
-  $('#cfgBtn').addEventListener('click', () => { refreshButtons(); $('#cfgDlg').showModal(); });
-  $('#colonsChk').addEventListener('change', e => {
-    colons = e.target.checked; store.set('colons', colons ? '1' : '0'); refreshButtons();
+  const UNIT_KEYS = ['h', 'm', 's'];
+  const UNIT_NAMES = { h: 'Std', m: 'Min', s: 'Sek' };
+  const ICON_X = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>';
+  const saveUnits = () => store.set('units', JSON.stringify(units));
+  const savePresets = () => store.set('presets', JSON.stringify(presets));
+  const summary = p => UNIT_KEYS.filter(k => p.units[k]).map(k => UNIT_NAMES[k]).join(p.colons ? ':' : ' ');
+  const sameAsCurrent = p => UNIT_KEYS.every(k => p.units[k] === units[k]) && p.colons === colons;
+
+  function markPresets(){
+    document.querySelectorAll('#presetList .pbtn').forEach(b =>
+      b.setAttribute('aria-pressed', sameAsCurrent(presets[b.dataset.use])));
+  }
+  function renderPresets(){
+    const list = $('#presetList'); list.textContent = '';
+    if (!presets.length){
+      const e = document.createElement('p'); e.className = 'hint';
+      e.textContent = 'Noch nichts gespeichert. Stelle die Anzeige ein und gib unten einen Namen ein.';
+      list.append(e); return;
+    }
+    presets.forEach((p, i) => {
+      const row = document.createElement('div'); row.className = 'preset';
+      const use = document.createElement('button'); use.type = 'button'; use.className = 'pbtn'; use.dataset.use = i;
+      const nm = document.createElement('span'); nm.textContent = p.name;
+      const sm = document.createElement('small'); sm.textContent = summary(p);
+      use.append(nm, sm);
+      const del = document.createElement('button'); del.type = 'button'; del.className = 'btn i'; del.dataset.del = i;
+      del.setAttribute('aria-label', 'Voreinstellung ' + p.name + ' löschen'); del.title = 'Löschen'; del.innerHTML = ICON_X;
+      row.append(use, del); list.append(row);
+    });
+    markPresets();
+  }
+  function refreshSettings(){
+    const plain = style === 'plain';
+    $('#colonsChk').checked = colons || plain;
+    $('#colonsChk').disabled = plain;
+    $('#colonsHint').hidden = !plain;
+    const on = UNIT_KEYS.filter(k => units[k]).length;
+    UNIT_KEYS.forEach(k => {
+      const c = $('#unit' + k.toUpperCase());
+      c.checked = units[k]; c.disabled = units[k] && on === 1;
+    });
+    markPresets();
+  }
+  function applyDisplay(){ saveUnits(); store.set('colons', colons ? '1' : '0'); layout(); refreshButtons(); update(); }
+
+  $('#cfgBtn').addEventListener('click', () => { renderPresets(); refreshSettings(); $('#cfgDlg').showModal(); });
+  $('#colonsChk').addEventListener('change', e => { colons = e.target.checked; applyDisplay(); });
+  UNIT_KEYS.forEach(k => $('#unit' + k.toUpperCase()).addEventListener('change', e => {
+    units[k] = e.target.checked;
+    if (!UNIT_KEYS.some(x => units[x])) units[k] = true;
+    applyDisplay();
+  }));
+
+  function addPreset(){
+    const input = $('#presetName');
+    const name = input.value.trim().slice(0, 20) || 'Voreinstellung ' + (presets.length + 1);
+    const p = { name, units: { ...units }, colons };
+    const i = presets.findIndex(x => x.name === name);
+    if (i >= 0) presets[i] = p; else presets.push(p);
+    savePresets(); input.value = ''; renderPresets();
+  }
+  $('#presetSave').addEventListener('click', addPreset);
+  $('#presetName').addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); addPreset(); } });
+  $('#presetList').addEventListener('click', e => {
+    const use = e.target.closest('[data-use]'), del = e.target.closest('[data-del]');
+    if (use){
+      const p = presets[Number(use.dataset.use)];
+      units = { ...p.units }; colons = p.colons; applyDisplay();
+    } else if (del){
+      presets.splice(Number(del.dataset.del), 1); savePresets(); renderPresets();
+    }
   });
 
   /* ---------- Timer einstellen ---------- */
@@ -432,6 +555,7 @@ dialog::backdrop{background:rgba(0,0,0,.55)}
     clearDone(); refreshButtons(); update();
   });
 
+  layout();
   refreshButtons();
   update();
 })();

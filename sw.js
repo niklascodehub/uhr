@@ -1,5 +1,5 @@
 // Bei jeder Aenderung an der App die Versionsnummer erhoehen (v2 -> v3 ...)
-const CACHE = 'uhr-v5';
+const CACHE = 'uhr-v6';
 const FILES = ['./', 'index.html', 'manifest.json', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
@@ -10,11 +10,11 @@ self.addEventListener('activate', e => {
     .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
     .then(() => self.clients.claim()));
 });
-// Netzwerk zuerst (immer die neueste Version), bei Offline aus dem Cache
+// Netzwerk zuerst (immer die neueste Version, auch am Browser-Cache vorbei), bei Offline aus dem Cache
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   e.respondWith(
-    fetch(e.request).then(res => {
+    fetch(e.request, { cache: 'no-cache' }).then(res => {
       if (res && (res.ok || res.type === 'opaque')) {
         const copy = res.clone();
         caches.open(CACHE).then(c => c.put(e.request, copy));
